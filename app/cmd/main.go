@@ -35,6 +35,7 @@ func main() {
 
 func PingHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte("pong"))
 }
 
@@ -45,11 +46,13 @@ func GetAllProductsHandler(w http.ResponseWriter, r *http.Request) {
 	productsAsJSON, err := json.Marshal(products)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("An error occurred"))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(productsAsJSON)
 }
 
@@ -61,6 +64,7 @@ func GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("Invalid ID"))
 		return
 	}
@@ -72,11 +76,13 @@ func GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
 	productAsJSON, err := json.Marshal(product)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("An error occurred"))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(productAsJSON)
 }
 
@@ -88,6 +94,7 @@ func GetProductsByPriceGreaterThanHandler(w http.ResponseWriter, r *http.Request
 	priceGtFloat, err := strconv.ParseFloat(priceGt, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("Invalid price"))
 		return
 	}
@@ -99,11 +106,13 @@ func GetProductsByPriceGreaterThanHandler(w http.ResponseWriter, r *http.Request
 	productsAsJSON, err := json.Marshal(products)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("An error occurred"))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(productsAsJSON)
 
 }
