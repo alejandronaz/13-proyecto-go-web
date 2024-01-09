@@ -11,6 +11,12 @@ type Repository struct {
 	Products []model.Product
 }
 
+var repo = Repository{}
+
+func GetRepository() *Repository {
+	return &repo
+}
+
 func (r *Repository) LoadData() {
 
 	// read the json file as a slice of bytes
