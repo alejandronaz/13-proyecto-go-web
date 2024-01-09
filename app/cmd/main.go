@@ -42,18 +42,19 @@ func PingHandler(w http.ResponseWriter, r *http.Request) {
 func GetAllProductsHandler(w http.ResponseWriter, r *http.Request) {
 	products := repo.GetAllProducts()
 
-	// productsAsJSON is a slice of bytes
-	productsAsJSON, err := json.Marshal(products)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("An error occurred"))
-		return
-	}
+	// // productsAsJSON is a slice of bytes
+	// productsAsJSON, err := json.Marshal(products)
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	w.Header().Set("Content-Type", "text/plain")
+	// 	w.Write([]byte("An error occurred"))
+	// 	return
+	// }
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(productsAsJSON)
+	// w.Write(productsAsJSON)
+	json.NewEncoder(w).Encode(products)
 }
 
 func GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
@@ -72,18 +73,19 @@ func GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
 	// get the product by id
 	product := repo.GetProductByID(idInt)
 
-	// productAsJSON is a slice of bytes
-	productAsJSON, err := json.Marshal(product)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("An error occurred"))
-		return
-	}
+	// // productAsJSON is a slice of bytes
+	// productAsJSON, err := json.Marshal(product)
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	w.Header().Set("Content-Type", "text/plain")
+	// 	w.Write([]byte("An error occurred"))
+	// 	return
+	// }
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(productAsJSON)
+	// w.Write(productAsJSON)
+	json.NewEncoder(w).Encode(product)
 }
 
 func GetProductsByPriceGreaterThanHandler(w http.ResponseWriter, r *http.Request) {
@@ -102,17 +104,18 @@ func GetProductsByPriceGreaterThanHandler(w http.ResponseWriter, r *http.Request
 	// get the products by price
 	products := repo.GetProductsByPriceGreaterThan(priceGtFloat)
 
-	// parse to json
-	productsAsJSON, err := json.Marshal(products)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("An error occurred"))
-		return
-	}
+	// // parse to json
+	// productsAsJSON, err := json.Marshal(products)
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	w.Header().Set("Content-Type", "text/plain")
+	// 	w.Write([]byte("An error occurred"))
+	// 	return
+	// }
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(productsAsJSON)
+	// w.Write(productsAsJSON)
+	json.NewEncoder(w).Encode(products)
 
 }
