@@ -53,7 +53,10 @@ func GetAllProductsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	// w.Write(productsAsJSON)
+	if len(products) == 0 {
+		w.Write([]byte(`[]`))
+		return
+	}
 	json.NewEncoder(w).Encode(products)
 }
 
@@ -115,7 +118,10 @@ func GetProductsByPriceGreaterThanHandler(w http.ResponseWriter, r *http.Request
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	// w.Write(productsAsJSON)
+	if len(products) == 0 {
+		w.Write([]byte(`[]`))
+		return
+	}
 	json.NewEncoder(w).Encode(products)
 
 }
