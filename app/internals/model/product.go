@@ -9,3 +9,7 @@ type Product struct {
 	Expiration  string  `json:"expiration"`
 	Price       float64 `json:"price"`
 }
+
+func (p *Product) IsEmpty() bool {
+	return p.ID == 0 && p.Name == "" && p.Quantity == 0 && p.CodeValue == "" && p.IsPublished == false && p.Expiration == "" && p.Price == 0
+}
