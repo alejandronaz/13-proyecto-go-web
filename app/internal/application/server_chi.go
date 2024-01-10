@@ -42,13 +42,13 @@ func (s *ServerChi) Start() error {
 	router := chi.NewRouter()
 
 	// create the routes
-	router.Get("/ping", handler.Ping())
+	router.Get("/ping", handler.Ping)
 
 	router.Route("/products", func(r chi.Router) {
-		r.Get("/", handler.GetAllProducts())
-		r.Get("/{id}", handler.GetProductByID())
-		r.Get("/search", handler.GetProductsByPriceGreaterThan())
-		r.Post("/", handler.CreateProduct())
+		r.Get("/", handler.GetAllProducts)
+		r.Get("/{id}", handler.GetProductByID)
+		r.Get("/search", handler.GetProductsByPriceGreaterThan)
+		r.Post("/", handler.CreateProduct)
 	})
 
 	// 5. start the server
