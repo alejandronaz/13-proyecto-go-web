@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"goweb/app/internals/model"
 )
 
@@ -41,4 +42,14 @@ func parseProductsToBody(products []model.Product) []ResponseBodyProduct {
 		productsAsResponse = append(productsAsResponse, parseProductToBody(product))
 	}
 	return productsAsResponse
+}
+
+func checkRequiredFields(body map[string]any, requiredFields ...string) error {
+	for _, field := range requiredFields {
+		_, ok := body[field]
+		if !ok {
+			return errors.New("Missing field " + field)
+		}
+	}
+	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"goweb/app/internals/model"
 	"goweb/app/internals/services"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -106,6 +107,7 @@ func GetProductsByPriceGreaterThanHandler(w http.ResponseWriter, r *http.Request
 
 func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 
+	// -----------------------------------------------------
 	// check auth header for creating a product
 	// TODO: implement a middleware for this
 	authHeader := r.Header.Get("Authorization")
@@ -115,12 +117,39 @@ func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Unauthorized"))
 		return
 	}
+	// -----------------------------------------------------
+
+	// check if json sent by client has all the required fields:
+	// 1. get the body as bytes
+	bytesJson, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid product"))
+		return
+	}
+	// 2. parse the bytes to a map (simil json)
+	var bodyJson map[string]any
+	err = json.Unmarshal(bytesJson, &bodyJson)
+	if err != nil {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid product"))
+		return
+	}
+	// 3. check if the map has all the required fields
+	err = checkRequiredFields(bodyJson, "name", "quantity", "code_value", "is_published", "expiration", "price")
+	if err != nil {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
 
 	// get the product from the request body
 	var product RequestBodyProduct
 
-	// IMPORTANTE: si alguna clave no coincide con el struct, se creará el struct con campos con zero values
-	err := json.NewDecoder(r.Body).Decode(&product)
+	err = json.Unmarshal(bytesJson, &product)
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusBadRequest)
