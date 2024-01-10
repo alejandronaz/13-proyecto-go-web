@@ -133,7 +133,7 @@ func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte(err.Error()))
+		w.Write([]byte(err.Error())) // no es recomendado retornar el error directamente, dado que puede exponer informacion interna
 		return
 	}
 
