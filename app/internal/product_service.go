@@ -1,6 +1,13 @@
-package service
+package internal
 
 import "errors"
+
+type ProductService interface {
+	GetAllProducts() []Product
+	GetProductByID(id int) (Product, error)
+	GetProductsByPriceGreaterThan(price float64) []Product
+	CreateProduct(product Product) (Product, error)
+}
 
 var (
 	ErrProductNotFound         = errors.New("product not found")

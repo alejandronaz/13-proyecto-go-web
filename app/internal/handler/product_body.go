@@ -2,7 +2,7 @@ package handler
 
 import (
 	"errors"
-	"goweb/app/internal/model"
+	"goweb/app/internal"
 )
 
 type RequestBodyProduct struct {
@@ -24,7 +24,7 @@ type ResponseBodyProduct struct {
 	Price       float64 `json:"price"`
 }
 
-func parseProductToBody(product model.Product) ResponseBodyProduct {
+func parseProductToBody(product internal.Product) ResponseBodyProduct {
 	return ResponseBodyProduct{
 		ID:          product.ID,
 		Name:        product.Name,
@@ -36,7 +36,7 @@ func parseProductToBody(product model.Product) ResponseBodyProduct {
 	}
 }
 
-func parseProductsToBody(products []model.Product) []ResponseBodyProduct {
+func parseProductsToBody(products []internal.Product) []ResponseBodyProduct {
 	var productsAsResponse []ResponseBodyProduct
 	for _, product := range products {
 		productsAsResponse = append(productsAsResponse, parseProductToBody(product))

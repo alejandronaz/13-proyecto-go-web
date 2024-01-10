@@ -3,18 +3,19 @@ package repository
 import (
 	"encoding/json"
 	"fmt"
-	"goweb/app/internal/model"
+	"goweb/app/internal"
 	"os"
 )
 
+// implements the ProductRepository interface
 type Repository struct {
-	Products []model.Product
+	Products []internal.Product
 }
 
-var repo = Repository{}
-
-func GetRepository() *Repository {
-	return &repo
+func NewRepository() *Repository {
+	repo := &Repository{}
+	repo.LoadData()
+	return repo
 }
 
 func (r *Repository) LoadData() {
@@ -35,21 +36,22 @@ func (r *Repository) LoadData() {
 
 }
 
-func (r *Repository) GetAllProducts() []model.Product {
+// implement the methods from the interface internal.ProductRepository
+func (r *Repository) GetAllProducts() []internal.Product {
 	return r.Products
 }
 
-func (r *Repository) GetProductByID(id int) model.Product {
+func (r *Repository) GetProductByID(id int) internal.Product {
 	for _, product := range r.Products {
 		if product.ID == id {
 			return product
 		}
 	}
-	return model.Product{}
+	return internal.Product{}
 }
 
-func (r *Repository) GetProductsByPriceGreaterThan(price float64) []model.Product {
-	var products []model.Product
+func (r *Repository) GetProductsByPriceGreaterThan(price float64) []internal.Product {
+	var products []internal.Product
 	for _, product := range r.Products {
 		if product.Price > price {
 			products = append(products, product)
@@ -58,6 +60,6 @@ func (r *Repository) GetProductsByPriceGreaterThan(price float64) []model.Produc
 	return products
 }
 
-func (r *Repository) AddProduct(product model.Product) {
+func (r *Repository) AddProduct(product internal.Product) {
 	r.Products = append(r.Products, product)
 }
