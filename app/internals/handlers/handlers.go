@@ -106,6 +106,15 @@ func GetProductsByPriceGreaterThanHandler(w http.ResponseWriter, r *http.Request
 
 func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 
+	// check auth header for creating a product
+	authHeader := r.Header.Get("Authorization")
+	if authHeader != "1234" {
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("Unauthorized"))
+		return
+	}
+
 	// get the product from the request body
 	var product RequestBodyProduct
 
