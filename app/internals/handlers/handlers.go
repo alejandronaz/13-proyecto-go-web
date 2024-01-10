@@ -107,6 +107,7 @@ func GetProductsByPriceGreaterThanHandler(w http.ResponseWriter, r *http.Request
 func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 
 	// check auth header for creating a product
+	// TODO: implement a middleware for this
 	authHeader := r.Header.Get("Authorization")
 	if authHeader != "1234" {
 		w.Header().Set("Content-Type", "text/plain")
