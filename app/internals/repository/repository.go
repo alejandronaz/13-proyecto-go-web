@@ -57,3 +57,7 @@ func (r *Repository) GetProductsByPriceGreaterThan(price float64) []model.Produc
 	}
 	return products
 }
+
+func (r *Repository) AddProduct(product model.Product) {
+	r.Products = append(r.Products, product)
+}

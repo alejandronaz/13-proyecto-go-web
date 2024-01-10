@@ -25,6 +25,7 @@ func main() {
 		r.Get("/", handlers.GetAllProductsHandler)
 		r.Get("/{id}", handlers.GetProductByIDHandler)
 		r.Get("/search", handlers.GetProductsByPriceGreaterThanHandler)
+		r.Post("/", handlers.CreateProductHandler)
 	})
 
 	http.ListenAndServe(":8080", router)

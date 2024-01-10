@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
-	"goweb/app/internals/repository"
+	"errors"
+	"goweb/app/internals/model"
+	"goweb/app/internals/services"
 	"net/http"
 	"strconv"
 
@@ -17,10 +19,7 @@ func PingHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetAllProductsHandler(w http.ResponseWriter, r *http.Request) {
 
-	// get the repo
-	repo := repository.GetRepository()
-
-	products := repo.GetAllProducts()
+	products := services.GetAllProducts()
 
 	// // productsAsJSON is a slice of bytes
 	// productsAsJSON, err := json.Marshal(products)
@@ -33,11 +32,16 @@ func GetAllProductsHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+
 	if len(products) == 0 {
 		w.Write([]byte(`[]`))
 		return
 	}
-	json.NewEncoder(w).Encode(products)
+
+	// parse each product to ResponseBodyProduct
+	productsAsResponse := parseProductsToBody(products)
+
+	json.NewEncoder(w).Encode(productsAsResponse)
 }
 
 func GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
@@ -53,30 +57,20 @@ func GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get the repo
-	repo := repository.GetRepository()
-
-	// get the product by id
-	product := repo.GetProductByID(idInt)
-
-	// // productAsJSON is a slice of bytes
-	// productAsJSON, err := json.Marshal(product)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	w.Header().Set("Content-Type", "text/plain")
-	// 	w.Write([]byte("An error occurred"))
-	// 	return
-	// }
+	product, err := services.GetProductByID(idInt)
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 
-	if product.IsEmpty() {
+	if errors.Is(err, services.ErrProductNotFound) {
 		w.Write([]byte(`{}`))
 		return
 	}
 
-	json.NewEncoder(w).Encode(product)
+	// parse product to ResponseBodyProduct
+	productAsResponse := parseProductToBody(product)
+
+	json.NewEncoder(w).Encode(productAsResponse)
 }
 
 func GetProductsByPriceGreaterThanHandler(w http.ResponseWriter, r *http.Request) {
@@ -92,27 +86,59 @@ func GetProductsByPriceGreaterThanHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// get the repo
-	repo := repository.GetRepository()
-
 	// get the products by price
-	products := repo.GetProductsByPriceGreaterThan(priceGtFloat)
-
-	// // parse to json
-	// productsAsJSON, err := json.Marshal(products)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	w.Header().Set("Content-Type", "text/plain")
-	// 	w.Write([]byte("An error occurred"))
-	// 	return
-	// }
+	products := services.GetProductsByPriceGreaterThan(priceGtFloat)
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+
 	if len(products) == 0 {
 		w.Write([]byte(`[]`))
 		return
 	}
-	json.NewEncoder(w).Encode(products)
+
+	// parse each product to ResponseBodyProduct
+	productsAsResponse := parseProductsToBody(products)
+
+	json.NewEncoder(w).Encode(productsAsResponse)
+
+}
+
+func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
+
+	// get the product from the request body
+	var product RequestBodyProduct
+	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte("Invalid product"))
+		return
+	}
+
+	// parse RequestBody to product model
+	newProduct := model.Product{
+		Name:        product.Name,
+		Quantity:    product.Quantity,
+		CodeValue:   product.CodeValue,
+		IsPublished: product.IsPublished,
+		Expiration:  product.Expiration,
+		Price:       product.Price,
+	}
+
+	// create the product
+	newProduct, err := services.CreateProduct(newProduct)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	// parse product to ResponseBodyProduct
+	productAsResponse := parseProductToBody(newProduct)
+
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(productAsResponse)
 
 }
