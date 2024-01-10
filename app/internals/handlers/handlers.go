@@ -108,7 +108,10 @@ func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 
 	// get the product from the request body
 	var product RequestBodyProduct
-	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
+
+	// IMPORTANTE: si alguna clave no coincide con el struct, se creará el struct con campos con zero values
+	err := json.NewDecoder(r.Body).Decode(&product)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("Invalid product"))
@@ -126,7 +129,7 @@ func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create the product
-	newProduct, err := services.CreateProduct(newProduct)
+	newProduct, err = services.CreateProduct(newProduct)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Header().Set("Content-Type", "text/plain")
