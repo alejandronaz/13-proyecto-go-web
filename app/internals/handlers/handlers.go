@@ -12,8 +12,8 @@ import (
 )
 
 func PingHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("pong"))
 }
 
@@ -30,8 +30,8 @@ func GetAllProductsHandler(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
 	if len(products) == 0 {
 		w.Write([]byte(`[]`))
@@ -51,16 +51,16 @@ func GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
 	// convert the id to int
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
 		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid ID"))
 		return
 	}
 
 	product, err := services.GetProductByID(idInt)
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
 	if errors.Is(err, services.ErrProductNotFound) {
 		w.Write([]byte(`{}`))
@@ -80,8 +80,8 @@ func GetProductsByPriceGreaterThanHandler(w http.ResponseWriter, r *http.Request
 	// convert the price to float
 	priceGtFloat, err := strconv.ParseFloat(priceGt, 64)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
 		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid price"))
 		return
 	}
@@ -89,8 +89,8 @@ func GetProductsByPriceGreaterThanHandler(w http.ResponseWriter, r *http.Request
 	// get the products by price
 	products := services.GetProductsByPriceGreaterThan(priceGtFloat)
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
 	if len(products) == 0 {
 		w.Write([]byte(`[]`))
@@ -112,8 +112,8 @@ func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 	// IMPORTANTE: si alguna clave no coincide con el struct, se creará el struct con campos con zero values
 	err := json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
 		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Invalid product"))
 		return
 	}
@@ -131,8 +131,8 @@ func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 	// create the product
 	newProduct, err = services.CreateProduct(newProduct)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
 		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error())) // no es recomendado retornar el error directamente, dado que puede exponer informacion interna
 		return
 	}
@@ -140,8 +140,8 @@ func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 	// parse product to ResponseBodyProduct
 	productAsResponse := parseProductToBody(newProduct)
 
-	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(productAsResponse)
 
 }
