@@ -2,8 +2,8 @@ package application
 
 import (
 	"errors"
-	"goweb/app/internals/handlers"
-	"goweb/app/internals/repository"
+	"goweb/app/internal/handler"
+	"goweb/app/internal/repository"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -34,13 +34,13 @@ func (s *ServerChi) Start() error {
 	router := chi.NewRouter()
 
 	// create the routes
-	router.Get("/ping", handlers.PingHandler)
+	router.Get("/ping", handler.PingHandler)
 
 	router.Route("/products", func(r chi.Router) {
-		r.Get("/", handlers.GetAllProductsHandler)
-		r.Get("/{id}", handlers.GetProductByIDHandler)
-		r.Get("/search", handlers.GetProductsByPriceGreaterThanHandler)
-		r.Post("/", handlers.CreateProductHandler)
+		r.Get("/", handler.GetAllProductsHandler)
+		r.Get("/{id}", handler.GetProductByIDHandler)
+		r.Get("/search", handler.GetProductsByPriceGreaterThanHandler)
+		r.Post("/", handler.CreateProductHandler)
 	})
 
 	err := http.ListenAndServe(":8080", router)

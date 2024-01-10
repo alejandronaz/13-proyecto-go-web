@@ -3,7 +3,7 @@ package repository
 import (
 	"encoding/json"
 	"fmt"
-	"goweb/app/internals/model"
+	"goweb/app/internal/model"
 	"os"
 )
 

@@ -1,9 +1,9 @@
-package services
+package service
 
 import (
 	"fmt"
-	"goweb/app/internals/model"
-	"goweb/app/internals/repository"
+	"goweb/app/internal/model"
+	"goweb/app/internal/repository"
 	"strings"
 	"time"
 )

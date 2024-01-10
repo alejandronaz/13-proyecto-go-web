@@ -1,8 +1,8 @@
-package handlers
+package handler
 
 import (
 	"errors"
-	"goweb/app/internals/model"
+	"goweb/app/internal/model"
 )
 
 type RequestBodyProduct struct {

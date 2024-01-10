@@ -1,10 +1,10 @@
-package handlers
+package handler
 
 import (
 	"encoding/json"
 	"errors"
-	"goweb/app/internals/model"
-	"goweb/app/internals/services"
+	"goweb/app/internal/model"
+	"goweb/app/internal/service"
 	"io"
 	"net/http"
 	"strconv"
@@ -20,7 +20,7 @@ func PingHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetAllProductsHandler(w http.ResponseWriter, r *http.Request) {
 
-	products := services.GetAllProducts()
+	products := service.GetAllProducts()
 
 	// // productsAsJSON is a slice of bytes
 	// productsAsJSON, err := json.Marshal(products)
@@ -58,12 +58,12 @@ func GetProductByIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	product, err := services.GetProductByID(idInt)
+	product, err := service.GetProductByID(idInt)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	if errors.Is(err, services.ErrProductNotFound) {
+	if errors.Is(err, service.ErrProductNotFound) {
 		w.Write([]byte(`{}`))
 		return
 	}
@@ -88,7 +88,7 @@ func GetProductsByPriceGreaterThanHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	// get the products by price
-	products := services.GetProductsByPriceGreaterThan(priceGtFloat)
+	products := service.GetProductsByPriceGreaterThan(priceGtFloat)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -168,7 +168,7 @@ func CreateProductHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create the product
-	newProduct, err = services.CreateProduct(newProduct)
+	newProduct, err = service.CreateProduct(newProduct)
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusBadRequest)

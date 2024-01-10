@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"goweb/app/internals/application"
+	"goweb/app/internal/application"
 )
 
 func main() {
