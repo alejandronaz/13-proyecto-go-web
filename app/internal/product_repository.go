@@ -6,4 +6,5 @@ type ProductRepository interface {
 	GetProductsByPriceGreaterThan(price float64) []Product
 	AddProduct(product Product)
 	UpdateProduct(product Product) (Product, error)
+	DeleteProduct(id int) error
 }

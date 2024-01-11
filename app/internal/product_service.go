@@ -10,6 +10,7 @@ type ProductService interface {
 	UpdateOrCreateProduct(product Product) (Product, error)
 	// for patch
 	UpdateProduct(product Product) (Product, error)
+	DeleteProduct(id int) error
 }
 
 var (

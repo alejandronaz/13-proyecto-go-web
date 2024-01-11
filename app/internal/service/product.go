@@ -134,3 +134,13 @@ func (p *ProductService) UpdateOrCreateProduct(product internal.Product) (intern
 	return newProd, nil
 
 }
+
+func (p *ProductService) DeleteProduct(id int) error {
+
+	err := p.repo.DeleteProduct(id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

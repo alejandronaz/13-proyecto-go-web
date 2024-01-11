@@ -51,6 +51,7 @@ func (s *ServerChi) Start() error {
 		r.Post("/", handler.CreateProduct)
 		r.Put("/{id}", handler.UpdateOrCreateProduct)
 		r.Patch("/{id}", handler.UpdateProduct)
+		r.Delete("/{id}", handler.DeleteProduct)
 	})
 
 	// 5. start the server

@@ -79,3 +79,14 @@ func (r *Repository) UpdateProduct(product internal.Product) (internal.Product, 
 
 	return internal.Product{}, internal.ErrProductNotFound
 }
+
+func (r *Repository) DeleteProduct(id int) error {
+	for i, p := range r.Products {
+		if p.ID == id {
+			r.Products = append(r.Products[:i], r.Products[i+1:]...)
+			return nil
+		}
+	}
+
+	return internal.ErrProductNotFound
+}

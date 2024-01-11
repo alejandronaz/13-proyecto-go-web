@@ -310,3 +310,33 @@ func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(prodRes)
 
 }
+
+func (p *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
+
+	// -----------------------------------------------------
+	// check auth header for deleting a product
+	authHeader := r.Header.Get("Authorization")
+	if authHeader != "1234" {
+		response.Text(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+	// -----------------------------------------------------
+
+	// convert the id to int
+	idProd, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		response.Text(w, http.StatusBadRequest, "Invalid ID")
+		return
+	}
+
+	// delete prod
+	err = p.service.DeleteProduct(idProd)
+	if err != nil {
+		response.Text(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"message": "Product deleted"}`))
+}
