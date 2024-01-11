@@ -31,16 +31,19 @@ func (r *RepositoryMap) LoadData() {
 	}
 
 	// unmarshal the bytes to a slice
-	var products []internal.Product
+	var products []ProductDTO
 	err = json.Unmarshal([]byte(data), &products)
 	if err != nil {
 		fmt.Println("Hubo un error")
 		return
 	}
 
+	// convert the slice of DTOs to a slice of internal.Product
+	productsInternal := dtoToInternal(products)
+
 	// convert the slice to a map
 	lastId := 0
-	for _, product := range products {
+	for _, product := range productsInternal {
 		r.Products[product.ID] = product
 		if product.ID > lastId {
 			lastId = product.ID
@@ -80,10 +83,12 @@ func (r *RepositoryMap) GetProductsByPriceGreaterThan(price float64) []internal.
 	return products
 }
 
-func (r *RepositoryMap) AddProduct(product internal.Product) {
+func (r *RepositoryMap) AddProduct(product internal.Product) internal.Product {
 	r.lastID++
 	product.ID = r.lastID
 	r.Products[r.lastID] = product
+
+	return product
 }
 
 func (r *RepositoryMap) UpdateProduct(product internal.Product) (internal.Product, error) {

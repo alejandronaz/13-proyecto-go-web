@@ -32,7 +32,7 @@ func (s *ServerChi) Start() error {
 	// 3. Handler
 
 	// 1. create the repo (aqui elijo especificamente que repo usar)
-	repo := repository.NewRepositoryMap() // en este caso, el repo es un slice
+	repo := repository.NewRepositoryMap()
 	// 2. create the service
 	service := service.NewProductService(repo)
 	// 3. create the handler
@@ -49,8 +49,8 @@ func (s *ServerChi) Start() error {
 		r.Get("/{id}", handler.GetProductByID)
 		r.Get("/search", handler.GetProductsByPriceGreaterThan)
 		r.Post("/", handler.CreateProduct)
-		r.Put("/{id}", handler.UpdateOrCreateProduct)
-		r.Patch("/{id}", handler.UpdateProduct)
+		r.Put("/{id}", handler.UpdateProduct)
+		r.Patch("/{id}", handler.ParcialUpdateProduct)
 		r.Delete("/{id}", handler.DeleteProduct)
 
 		r.Get("/consumer_price", handler.CalculateConsumerPrice)

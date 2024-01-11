@@ -66,11 +66,8 @@ func (p *ProductService) CreateProduct(product internal.Product) (internal.Produ
 		return internal.Product{}, internal.ErrInvalidExpirationFormat
 	}
 
-	// set id to the product
-	product.ID = len(products) + 1
-
 	// add the product to the repo
-	p.repo.AddProduct(product)
+	product = p.repo.AddProduct(product)
 
 	return product, nil
 
@@ -108,30 +105,6 @@ func (p *ProductService) UpdateProduct(product internal.Product) (internal.Produ
 	}
 
 	return prodUpdt, nil
-
-}
-
-func (p *ProductService) UpdateOrCreateProduct(product internal.Product) (internal.Product, error) {
-
-	// 1. Update
-	prodUpdt, err := p.UpdateProduct(product)
-	if err == nil { // means that the product was updated
-		return prodUpdt, nil
-	}
-
-	// 2. Create
-	products := p.repo.GetAllProducts()
-	newProd := internal.Product{
-		ID:          len(products) + 1,
-		Name:        product.Name,
-		CodeValue:   product.CodeValue,
-		Price:       product.Price,
-		Expiration:  product.Expiration,
-		Quantity:    product.Quantity,
-		IsPublished: product.IsPublished,
-	}
-	p.repo.AddProduct(newProd)
-	return newProd, nil
 
 }
 

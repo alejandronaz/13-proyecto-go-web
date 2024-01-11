@@ -176,7 +176,8 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (p *ProductHandler) UpdateOrCreateProduct(w http.ResponseWriter, r *http.Request) {
+// for PUT method
+func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	// -----------------------------------------------------
 	// check auth header for updating a product
@@ -230,7 +231,7 @@ func (p *ProductHandler) UpdateOrCreateProduct(w http.ResponseWriter, r *http.Re
 	}
 
 	// call service
-	productModel, err = p.service.UpdateOrCreateProduct(productModel)
+	productModel, err = p.service.UpdateProduct(productModel)
 	if err != nil {
 		response.Text(w, http.StatusBadRequest, err.Error())
 		return
@@ -245,7 +246,8 @@ func (p *ProductHandler) UpdateOrCreateProduct(w http.ResponseWriter, r *http.Re
 
 }
 
-func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+// for PATCH method
+func (p *ProductHandler) ParcialUpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	// -----------------------------------------------------
 	// check auth header for updating a product
@@ -297,7 +299,7 @@ func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// call service
-	productModel, err = p.service.UpdateOrCreateProduct(productModel)
+	productModel, err = p.service.UpdateProduct(productModel)
 	if err != nil {
 		response.Text(w, http.StatusBadRequest, err.Error())
 		return

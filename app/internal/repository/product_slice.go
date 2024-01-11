@@ -28,11 +28,15 @@ func (r *Repository) LoadData() {
 	}
 
 	// unmarshal the bytes to the repo slice
-	err = json.Unmarshal([]byte(data), &r.Products)
+	var products []ProductDTO
+	err = json.Unmarshal([]byte(data), &products)
 	if err != nil {
 		fmt.Println("Hubo un error")
 		return
 	}
+
+	// convert the slice of DTOs to a slice of internal.Product
+	r.Products = dtoToInternal(products)
 
 }
 
@@ -60,8 +64,12 @@ func (r *Repository) GetProductsByPriceGreaterThan(price float64) []internal.Pro
 	return products
 }
 
-func (r *Repository) AddProduct(product internal.Product) {
+func (r *Repository) AddProduct(product internal.Product) internal.Product {
+
+	product.ID = len(r.Products) + 1
 	r.Products = append(r.Products, product)
+
+	return product
 }
 
 func (r *Repository) UpdateProduct(product internal.Product) (internal.Product, error) {

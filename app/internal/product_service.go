@@ -7,8 +7,7 @@ type ProductService interface {
 	GetProductByID(id int) (Product, error)
 	GetProductsByPriceGreaterThan(price float64) []Product
 	CreateProduct(product Product) (Product, error)
-	UpdateOrCreateProduct(product Product) (Product, error)
-	// for patch
+	// UpdateOrCreateProduct(product Product) (Product, error)
 	UpdateProduct(product Product) (Product, error)
 	DeleteProduct(id int) error
 	CalculateConsumerPrice(id ...int) ([]Product, float64, error)
