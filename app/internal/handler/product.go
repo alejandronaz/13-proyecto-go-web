@@ -37,7 +37,10 @@ func (p *ProductHandler) GetAllProducts(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusOK)
 
 	if len(products) == 0 {
-		w.Write([]byte(`[]`))
+		response.JSON(w, http.StatusNotFound, ErrorResponse{
+			Message: "No products found",
+			Status:  http.StatusNotFound,
+		})
 		return
 	}
 
@@ -56,19 +59,25 @@ func (p *ProductHandler) GetProductByID(w http.ResponseWriter, r *http.Request) 
 	// convert the id to int
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, "Invalid ID")
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid ID",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 
 	product, err := p.service.GetProductByID(idInt)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
 	if errors.Is(err, internal.ErrProductNotFound) {
-		w.Write([]byte(`{}`))
+		response.JSON(w, http.StatusNotFound, ErrorResponse{
+			Message: "No products found",
+			Status:  http.StatusNotFound,
+		})
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
 	// parse product to ResponseBodyProduct
 	productAsResponse := parseProductToBody(product)
@@ -84,7 +93,10 @@ func (p *ProductHandler) GetProductsByPriceGreaterThan(w http.ResponseWriter, r 
 	// convert the price to float
 	priceGtFloat, err := strconv.ParseFloat(priceGt, 64)
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, "Invalid price")
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid price",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 
@@ -113,7 +125,10 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	// TODO: implement a middleware for this
 	authHeader := r.Header.Get("Authorization")
 	if authHeader != "1234" {
-		response.Text(w, http.StatusUnauthorized, "Unauthorized")
+		response.JSON(w, http.StatusUnauthorized, ErrorResponse{
+			Message: "Unauthorized",
+			Status:  http.StatusUnauthorized,
+		})
 		return
 	}
 	// -----------------------------------------------------
@@ -122,20 +137,29 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	// 1. get the body as bytes
 	bytesJson, err := io.ReadAll(r.Body)
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, "Invalid product")
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid product",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 	// 2. parse the bytes to a map (simil json)
 	var bodyJson map[string]any
 	err = json.Unmarshal(bytesJson, &bodyJson)
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, "Invalid product")
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid product",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 	// 3. check if the map has all the required fields
 	err = checkRequiredFields(bodyJson, "name", "quantity", "code_value", "is_published", "expiration", "price")
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, err.Error())
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "There are missing fields",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 	// -------------------------------------------------------------------------
@@ -145,7 +169,10 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(bytesJson, &product)
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, "Invalid product")
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid product",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 
@@ -162,8 +189,23 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	// create the product
 	newProduct, err = p.service.CreateProduct(newProduct)
 	if err != nil {
-		// no es recomendado retornar el error directamente, dado que puede exponer informacion interna
-		response.Text(w, http.StatusBadRequest, err.Error())
+		switch {
+		case errors.Is(err, internal.ErrProductExists):
+			response.JSON(w, http.StatusBadRequest, ErrorResponse{
+				Message: "Product already exists",
+				Status:  http.StatusBadRequest,
+			})
+		case errors.Is(err, internal.ErrInvalidExpirationFormat):
+			response.JSON(w, http.StatusBadRequest, ErrorResponse{
+				Message: "Invalid expiration format",
+				Status:  http.StatusBadRequest,
+			})
+		default:
+			response.JSON(w, http.StatusBadRequest, ErrorResponse{
+				Message: "Invalid product",
+				Status:  http.StatusBadRequest,
+			})
+		}
 		return
 	}
 
@@ -184,7 +226,10 @@ func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	// TODO: implement a middleware for this
 	authHeader := r.Header.Get("Authorization")
 	if authHeader != "1234" {
-		response.Text(w, http.StatusUnauthorized, "Unauthorized")
+		response.JSON(w, http.StatusUnauthorized, ErrorResponse{
+			Message: "Unauthorized",
+			Status:  http.StatusUnauthorized,
+		})
 		return
 	}
 	// -----------------------------------------------------
@@ -192,31 +237,46 @@ func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	// convert the id to int
 	idProd, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, "Invalid ID")
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid ID",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 
 	// --------check if json sent by client has all the required fields--------
 	bytesJson, err := io.ReadAll(r.Body)
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, "Invalid product")
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid product",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 	var mapJson map[string]any
 	if err := json.Unmarshal(bytesJson, &mapJson); err != nil {
-		response.Text(w, http.StatusBadRequest, "Invalid product")
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid product",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 	err = checkRequiredFields(mapJson, "name", "quantity", "code_value", "is_published", "expiration", "price")
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, err.Error())
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "There are missing fields",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 
 	// get the product from the request body
 	var product RequestBodyProduct
 	if err := json.Unmarshal(bytesJson, &product); err != nil {
-		response.Text(w, http.StatusBadRequest, "Invalid product")
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid product",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 	// parse RequestBody to product model
@@ -254,7 +314,10 @@ func (p *ProductHandler) ParcialUpdateProduct(w http.ResponseWriter, r *http.Req
 	// TODO: implement a middleware for this
 	authHeader := r.Header.Get("Authorization")
 	if authHeader != "1234" {
-		response.Text(w, http.StatusUnauthorized, "Unauthorized")
+		response.JSON(w, http.StatusUnauthorized, ErrorResponse{
+			Message: "Unauthorized",
+			Status:  http.StatusUnauthorized,
+		})
 		return
 	}
 	// -----------------------------------------------------
@@ -262,14 +325,20 @@ func (p *ProductHandler) ParcialUpdateProduct(w http.ResponseWriter, r *http.Req
 	// convert the id to int
 	idProd, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, "Invalid ID")
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid ID",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 
 	// get the product by id
 	product, err := p.service.GetProductByID(idProd)
-	if err != nil {
-		response.Text(w, http.StatusBadRequest, err.Error())
+	if errors.Is(err, internal.ErrProductNotFound) {
+		response.JSON(w, http.StatusNotFound, ErrorResponse{
+			Message: "No products found",
+			Status:  http.StatusNotFound,
+		})
 		return
 	}
 
@@ -283,7 +352,10 @@ func (p *ProductHandler) ParcialUpdateProduct(w http.ResponseWriter, r *http.Req
 		Price:       product.Price,
 	}
 	if err := json.NewDecoder(r.Body).Decode(&productBody); err != nil {
-		response.Text(w, http.StatusBadRequest, "Invalid product")
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid product",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 
@@ -301,7 +373,28 @@ func (p *ProductHandler) ParcialUpdateProduct(w http.ResponseWriter, r *http.Req
 	// call service
 	productModel, err = p.service.UpdateProduct(productModel)
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, err.Error())
+		switch {
+		case errors.Is(err, internal.ErrCodeValueBelongsToOther):
+			response.JSON(w, http.StatusBadRequest, ErrorResponse{
+				Message: "Code value belongs to other product",
+				Status:  http.StatusBadRequest,
+			})
+		case errors.Is(err, internal.ErrInvalidExpirationFormat):
+			response.JSON(w, http.StatusBadRequest, ErrorResponse{
+				Message: "Invalid expiration format",
+				Status:  http.StatusBadRequest,
+			})
+		case errors.Is(err, internal.ErrProductEmpty):
+			response.JSON(w, http.StatusBadRequest, ErrorResponse{
+				Message: "Product is empty",
+				Status:  http.StatusBadRequest,
+			})
+		default:
+			response.JSON(w, http.StatusBadRequest, ErrorResponse{
+				Message: "Invalid product",
+				Status:  http.StatusBadRequest,
+			})
+		}
 		return
 	}
 
@@ -320,7 +413,10 @@ func (p *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	// check auth header for deleting a product
 	authHeader := r.Header.Get("Authorization")
 	if authHeader != "1234" {
-		response.Text(w, http.StatusUnauthorized, "Unauthorized")
+		response.JSON(w, http.StatusUnauthorized, ErrorResponse{
+			Message: "Unauthorized",
+			Status:  http.StatusUnauthorized,
+		})
 		return
 	}
 	// -----------------------------------------------------
@@ -328,14 +424,20 @@ func (p *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	// convert the id to int
 	idProd, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, "Invalid ID")
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid ID",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 
 	// delete prod
 	err = p.service.DeleteProduct(idProd)
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, err.Error())
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "There was a problem deleting the product",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 
@@ -358,7 +460,10 @@ func (p *ProductHandler) CalculateConsumerPrice(w http.ResponseWriter, r *http.R
 		for _, str := range sliceStr {
 			integer, err := strconv.Atoi(str)
 			if err != nil {
-				response.Text(w, http.StatusBadRequest, "Invalid list")
+				response.JSON(w, http.StatusBadRequest, ErrorResponse{
+					Message: "Invalid list",
+					Status:  http.StatusBadRequest,
+				})
 				return
 			}
 			sliceInt = append(sliceInt, integer)
@@ -368,7 +473,10 @@ func (p *ProductHandler) CalculateConsumerPrice(w http.ResponseWriter, r *http.R
 	// call service
 	products, price, err := p.service.CalculateConsumerPrice(sliceInt...) // if no params are passed, sliceInt is empty, i.e. CalculateConsumerPrice()
 	if err != nil {
-		response.Text(w, http.StatusBadRequest, err.Error())
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "There was a problem calculating the consumer price",
+			Status:  http.StatusBadRequest,
+		})
 		return
 	}
 

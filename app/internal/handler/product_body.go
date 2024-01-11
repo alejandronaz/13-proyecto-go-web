@@ -58,3 +58,8 @@ type ResponseConsumerPrice struct {
 	Products   []ResponseBodyProduct `json:"products"`
 	TotalPrice float64               `json:"total_price"`
 }
+
+type ErrorResponse struct {
+	Message string `json:"message"`
+	Status  int    `json:"status"`
+}
