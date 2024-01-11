@@ -7,6 +7,7 @@ type ProductService interface {
 	GetProductByID(id int) (Product, error)
 	GetProductsByPriceGreaterThan(price float64) []Product
 	CreateProduct(product Product) (Product, error)
+	UpdateOrCreateProduct(product Product) (Product, error)
 }
 
 var (
@@ -14,4 +15,5 @@ var (
 	ErrProductExists           = errors.New("product already exists")
 	ErrProductEmpty            = errors.New("product is empty")
 	ErrInvalidExpirationFormat = errors.New("invalid expiration format")
+	ErrCodeValueBelongsToOther = errors.New("code value belongs to other product")
 )

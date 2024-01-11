@@ -174,3 +174,72 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(productAsResponse)
 
 }
+
+func (p *ProductHandler) UpdateOrCreateProduct(w http.ResponseWriter, r *http.Request) {
+
+	// -----------------------------------------------------
+	// check auth header for updating a product
+	// TODO: implement a middleware for this
+	authHeader := r.Header.Get("Authorization")
+	if authHeader != "1234" {
+		response.Text(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+	// -----------------------------------------------------
+
+	// convert the id to int
+	idProd, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		response.Text(w, http.StatusBadRequest, "Invalid ID")
+		return
+	}
+
+	// --------check if json sent by client has all the required fields--------
+	bytesJson, err := io.ReadAll(r.Body)
+	if err != nil {
+		response.Text(w, http.StatusBadRequest, "Invalid product")
+		return
+	}
+	var mapJson map[string]any
+	if err := json.Unmarshal(bytesJson, &mapJson); err != nil {
+		response.Text(w, http.StatusBadRequest, "Invalid product")
+		return
+	}
+	err = checkRequiredFields(mapJson, "name", "quantity", "code_value", "is_published", "expiration", "price")
+	if err != nil {
+		response.Text(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// get the product from the request body
+	var product RequestBodyProduct
+	if err := json.Unmarshal(bytesJson, &product); err != nil {
+		response.Text(w, http.StatusBadRequest, "Invalid product")
+		return
+	}
+	// parse RequestBody to product model
+	productModel := internal.Product{
+		ID:          idProd,
+		Name:        product.Name,
+		Quantity:    product.Quantity,
+		CodeValue:   product.CodeValue,
+		IsPublished: product.IsPublished,
+		Expiration:  product.Expiration,
+		Price:       product.Price,
+	}
+
+	// call service
+	productModel, err = p.service.UpdateOrCreateProduct(productModel)
+	if err != nil {
+		response.Text(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// parse productModel to ResponseBodyProduct
+	prodRes := parseProductToBody(productModel)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(prodRes)
+
+}

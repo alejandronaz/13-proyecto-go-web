@@ -75,3 +75,51 @@ func (p *ProductService) CreateProduct(product internal.Product) (internal.Produ
 	return product, nil
 
 }
+
+func (p *ProductService) UpdateOrCreateProduct(product internal.Product) (internal.Product, error) {
+
+	// 1. Update
+
+	// check if product is empty
+	if product.IsEmpty() {
+		return internal.Product{}, internal.ErrProductEmpty
+	}
+
+	// verify expiration format XX/XX/XXXX
+	exp := strings.Split(product.Expiration, "/")
+	if len(exp) != 3 {
+		return internal.Product{}, internal.ErrInvalidExpirationFormat
+	}
+	// if time cant parse it, then it is invalid
+	_, err := time.Parse(time.DateOnly, fmt.Sprint(exp[2], "-", exp[1], "-", exp[0]))
+	if err != nil {
+		return internal.Product{}, internal.ErrInvalidExpirationFormat
+	}
+
+	// check if the code value belongs to another product
+	products := p.repo.GetAllProducts()
+	for _, p := range products {
+		if p.CodeValue == product.CodeValue && p.ID != product.ID {
+			return internal.Product{}, internal.ErrCodeValueBelongsToOther
+		}
+	}
+
+	prodUpdt, err := p.repo.UpdateProduct(product)
+	if err == nil { // means that the product was updated
+		return prodUpdt, nil
+	}
+
+	// 2. Create
+	newProd := internal.Product{
+		ID:          len(products) + 1,
+		Name:        product.Name,
+		CodeValue:   product.CodeValue,
+		Price:       product.Price,
+		Expiration:  product.Expiration,
+		Quantity:    product.Quantity,
+		IsPublished: product.IsPublished,
+	}
+	p.repo.AddProduct(newProd)
+	return newProd, nil
+
+}

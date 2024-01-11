@@ -63,3 +63,19 @@ func (r *Repository) GetProductsByPriceGreaterThan(price float64) []internal.Pro
 func (r *Repository) AddProduct(product internal.Product) {
 	r.Products = append(r.Products, product)
 }
+
+func (r *Repository) UpdateProduct(product internal.Product) (internal.Product, error) {
+	for i, p := range r.Products {
+		if p.ID == product.ID {
+			r.Products[i].Name = product.Name
+			r.Products[i].CodeValue = product.CodeValue
+			r.Products[i].Expiration = product.Expiration
+			r.Products[i].IsPublished = product.IsPublished
+			r.Products[i].Quantity = product.Quantity
+			r.Products[i].Price = product.Price
+			return r.Products[i], nil
+		}
+	}
+
+	return internal.Product{}, internal.ErrProductNotFound
+}
