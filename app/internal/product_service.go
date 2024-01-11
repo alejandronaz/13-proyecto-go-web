@@ -11,6 +11,7 @@ type ProductService interface {
 	// for patch
 	UpdateProduct(product Product) (Product, error)
 	DeleteProduct(id int) error
+	CalculateConsumerPrice(id ...int) ([]Product, float64, error)
 }
 
 var (

@@ -144,3 +144,45 @@ func (p *ProductService) DeleteProduct(id int) error {
 
 	return nil
 }
+
+func (p *ProductService) CalculateConsumerPrice(idList ...int) ([]internal.Product, float64, error) {
+
+	// calculate the number of each product in the list
+	var idMap = make(map[int]int)
+	for _, id := range idList {
+		idMap[id]++
+	}
+
+	// if no id is passed, then calculate the price for all products
+	if len(idList) == 0 {
+		for _, prod := range p.GetAllProducts() {
+			idMap[prod.ID]++
+		}
+	}
+
+	// calculate the tax
+	tax := 1.0
+	switch {
+	case len(idList) < 10:
+		tax = 1.21
+	case len(idList) > 10 && len(idList) <= 20:
+		tax = 1.17
+	case len(idList) > 20:
+		tax = 1.15
+	}
+
+	finalPrice := 0.0
+	prods := []internal.Product{}
+
+	for id, quantity := range idMap {
+		product, _ := p.GetProductByID(id)
+		if product.Quantity >= quantity {
+			finalPrice += product.Price * float64(quantity)
+			product.Quantity = quantity // set the quantity requested by the consumer
+			prods = append(prods, product)
+		}
+	}
+
+	return prods, finalPrice * tax, nil
+
+}

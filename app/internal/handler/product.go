@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -339,4 +340,44 @@ func (p *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"message": "Product deleted"}`))
+}
+
+func (p *ProductHandler) CalculateConsumerPrice(w http.ResponseWriter, r *http.Request) {
+
+	list := r.URL.Query().Get("list")
+	var sliceInt []int
+
+	if list != "" {
+		// convert to slice of int
+		list = strings.ReplaceAll(list, "[", "")
+		list = strings.ReplaceAll(list, "]", "")
+		sliceStr := strings.Split(list, ",")
+
+		for _, str := range sliceStr {
+			integer, err := strconv.Atoi(str)
+			if err != nil {
+				response.Text(w, http.StatusBadRequest, "Invalid list")
+				return
+			}
+			sliceInt = append(sliceInt, integer)
+		}
+	}
+
+	// call service
+	products, price, err := p.service.CalculateConsumerPrice(sliceInt...) // if no params are passed, sliceInt is empty, i.e. CalculateConsumerPrice()
+	if err != nil {
+		response.Text(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// parse products to ResponseBodyProduct
+	productsAsResponse := parseProductsToBody(products)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(ResponseConsumerPrice{
+		Products:   productsAsResponse,
+		TotalPrice: price,
+	})
+
 }

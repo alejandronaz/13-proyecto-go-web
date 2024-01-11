@@ -53,3 +53,8 @@ func checkRequiredFields(body map[string]any, requiredFields ...string) error {
 	}
 	return nil
 }
+
+type ResponseConsumerPrice struct {
+	Products   []ResponseBodyProduct `json:"products"`
+	TotalPrice float64               `json:"total_price"`
+}

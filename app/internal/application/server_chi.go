@@ -52,6 +52,8 @@ func (s *ServerChi) Start() error {
 		r.Put("/{id}", handler.UpdateOrCreateProduct)
 		r.Patch("/{id}", handler.UpdateProduct)
 		r.Delete("/{id}", handler.DeleteProduct)
+
+		r.Get("/consumer_price", handler.CalculateConsumerPrice)
 	})
 
 	// 5. start the server
