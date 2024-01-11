@@ -32,7 +32,7 @@ func (s *ServerChi) Start() error {
 	// 3. Handler
 
 	// 1. create the repo (aqui elijo especificamente que repo usar)
-	repo := repository.NewRepository() // en este caso, el repo es un slice
+	repo := repository.NewRepositoryMap() // en este caso, el repo es un slice
 	// 2. create the service
 	service := service.NewProductService(repo)
 	// 3. create the handler
