@@ -76,9 +76,7 @@ func (p *ProductService) CreateProduct(product internal.Product) (internal.Produ
 
 }
 
-func (p *ProductService) UpdateOrCreateProduct(product internal.Product) (internal.Product, error) {
-
-	// 1. Update
+func (p *ProductService) UpdateProduct(product internal.Product) (internal.Product, error) {
 
 	// check if product is empty
 	if product.IsEmpty() {
@@ -105,11 +103,24 @@ func (p *ProductService) UpdateOrCreateProduct(product internal.Product) (intern
 	}
 
 	prodUpdt, err := p.repo.UpdateProduct(product)
+	if err != nil {
+		return internal.Product{}, err
+	}
+
+	return prodUpdt, nil
+
+}
+
+func (p *ProductService) UpdateOrCreateProduct(product internal.Product) (internal.Product, error) {
+
+	// 1. Update
+	prodUpdt, err := p.UpdateProduct(product)
 	if err == nil { // means that the product was updated
 		return prodUpdt, nil
 	}
 
 	// 2. Create
+	products := p.repo.GetAllProducts()
 	newProd := internal.Product{
 		ID:          len(products) + 1,
 		Name:        product.Name,

@@ -8,6 +8,8 @@ type ProductService interface {
 	GetProductsByPriceGreaterThan(price float64) []Product
 	CreateProduct(product Product) (Product, error)
 	UpdateOrCreateProduct(product Product) (Product, error)
+	// for patch
+	UpdateProduct(product Product) (Product, error)
 }
 
 var (

@@ -243,3 +243,70 @@ func (p *ProductHandler) UpdateOrCreateProduct(w http.ResponseWriter, r *http.Re
 	json.NewEncoder(w).Encode(prodRes)
 
 }
+
+func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+
+	// -----------------------------------------------------
+	// check auth header for updating a product
+	// TODO: implement a middleware for this
+	authHeader := r.Header.Get("Authorization")
+	if authHeader != "1234" {
+		response.Text(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+	// -----------------------------------------------------
+
+	// convert the id to int
+	idProd, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		response.Text(w, http.StatusBadRequest, "Invalid ID")
+		return
+	}
+
+	// get the product by id
+	product, err := p.service.GetProductByID(idProd)
+	if err != nil {
+		response.Text(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// get the product from the request body, setting the default values from the existent product
+	var productBody RequestBodyProduct = RequestBodyProduct{
+		Name:        product.Name,
+		Quantity:    product.Quantity,
+		CodeValue:   product.CodeValue,
+		IsPublished: product.IsPublished,
+		Expiration:  product.Expiration,
+		Price:       product.Price,
+	}
+	if err := json.NewDecoder(r.Body).Decode(&productBody); err != nil {
+		response.Text(w, http.StatusBadRequest, "Invalid product")
+		return
+	}
+
+	// parse RequestBody to product model
+	productModel := internal.Product{
+		ID:          idProd,
+		Name:        productBody.Name,
+		Quantity:    productBody.Quantity,
+		CodeValue:   productBody.CodeValue,
+		IsPublished: productBody.IsPublished,
+		Expiration:  productBody.Expiration,
+		Price:       productBody.Price,
+	}
+
+	// call service
+	productModel, err = p.service.UpdateOrCreateProduct(productModel)
+	if err != nil {
+		response.Text(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// parse productModel to ResponseBodyProduct
+	prodRes := parseProductToBody(productModel)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(prodRes)
+
+}

@@ -50,6 +50,7 @@ func (s *ServerChi) Start() error {
 		r.Get("/search", handler.GetProductsByPriceGreaterThan)
 		r.Post("/", handler.CreateProduct)
 		r.Put("/{id}", handler.UpdateOrCreateProduct)
+		r.Patch("/{id}", handler.UpdateProduct)
 	})
 
 	// 5. start the server
