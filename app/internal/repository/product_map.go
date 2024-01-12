@@ -23,8 +23,17 @@ func NewRepositoryMap(data map[int]internal.Product) *RepositoryMap {
 		return repo
 	}
 
+	// find the last id
+	lastID := 0
+	for _, product := range data {
+		if product.ID > lastID {
+			lastID = product.ID
+		}
+	}
+
 	return &RepositoryMap{
 		Products: data,
+		lastID:   lastID,
 	}
 }
 

@@ -8,6 +8,7 @@ import (
 	"goweb/app/internal/service"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -105,6 +106,35 @@ func TestGetProductByID(t *testing.T) {
 
 		// Assert
 		expectedCode := http.StatusOK
+		expectedBody := `{"id":1,"name":"Producto 1","quantity":10,"code_value":"123456","is_published":true,"expiration":"31/12/2021","price":100}`
+		expectedHeader := http.Header{
+			"Content-Type": []string{"application/json"},
+		}
+		require.Equal(t, expectedCode, res.Code)
+		require.JSONEq(t, expectedBody, res.Body.String())
+		require.Equal(t, expectedHeader, res.Header())
+	})
+}
+
+func TestCreateProduct(t *testing.T) {
+	t.Run("Se añade un producto en la API y se devuelve el mismo en el cuerpo de la respuesta.", func(t *testing.T) {
+		// Arrange
+		data := map[int]internal.Product{}
+		repo := repository.NewRepositoryMap(data)
+		service := service.NewProductService(repo)
+		handler := handler.NewProductHandler(service)
+
+		body := strings.NewReader(`{"name":"Producto 1","quantity":10,"code_value":"123456","is_published":true,"expiration":"31/12/2021","price":100}`)
+
+		res := httptest.NewRecorder()
+		req := httptest.NewRequest("POST", "/products", body)
+		req.Header.Add("Authorization", "1234")
+
+		// Act
+		handler.CreateProduct(res, req)
+
+		// Assert
+		expectedCode := http.StatusCreated
 		expectedBody := `{"id":1,"name":"Producto 1","quantity":10,"code_value":"123456","is_published":true,"expiration":"31/12/2021","price":100}`
 		expectedHeader := http.Header{
 			"Content-Type": []string{"application/json"},
