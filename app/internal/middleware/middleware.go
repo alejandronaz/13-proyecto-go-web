@@ -36,9 +36,10 @@ func Logs(handler http.Handler) http.Handler {
 		timeReq := time.Now()
 		tamano := r.ContentLength
 
-		fmt.Printf("Method: %s - Path: %s - Time: %s - Tamaño: %db\n", method, path, timeReq.Format("02/01/2006 15:04:05"), tamano)
-
 		// call the handler
 		handler.ServeHTTP(w, r)
+
+		totalTime := time.Since(timeReq).Seconds()
+		fmt.Printf("Method: %s - Path: %s - Time: %s - Tamaño: %db, Total time execution: %fs\n", method, path, timeReq.Format("02/01/2006 15:04:05"), tamano, totalTime)
 	})
 }

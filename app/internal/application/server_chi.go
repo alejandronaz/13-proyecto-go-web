@@ -43,7 +43,7 @@ func (s *ServerChi) Start() error {
 	router := chi.NewRouter()
 
 	// add the middleware
-	router.Use(middleware.Auth, middleware.Logs)
+	router.Use(middleware.Logs, middleware.Auth)
 
 	// create the routes
 	router.Get("/ping", handler.Ping)
