@@ -33,9 +33,6 @@ func (p *ProductHandler) GetAllProducts(w http.ResponseWriter, r *http.Request) 
 
 	products := p.service.GetAllProducts()
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
 	if len(products) == 0 {
 		response.JSON(w, http.StatusNotFound, ErrorResponse{
 			Message: "No products found",
@@ -43,6 +40,9 @@ func (p *ProductHandler) GetAllProducts(w http.ResponseWriter, r *http.Request) 
 		})
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
 	// parse each product to ResponseBodyProduct
 	productsAsResponse := parseProductsToBody(products)
@@ -469,8 +469,7 @@ func (p *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "Product deleted"}`))
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (p *ProductHandler) CalculateConsumerPrice(w http.ResponseWriter, r *http.Request) {
