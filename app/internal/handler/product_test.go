@@ -114,6 +114,84 @@ func TestGetProductByID(t *testing.T) {
 		require.JSONEq(t, expectedBody, res.Body.String())
 		require.Equal(t, expectedHeader, res.Header())
 	})
+
+	t.Run("El cliente envía un id erróneo", func(t *testing.T) {
+		// Arrange
+		data := map[int]internal.Product{}
+		repo := repository.NewRepositoryMap(data)
+		service := service.NewProductService(repo)
+		handler := handler.NewProductHandler(service)
+
+		res := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/products/NOTNUMBER", nil)
+		// add id path param to the request
+		chiCtx := chi.NewRouteContext()
+		chiCtx.URLParams.Add("id", "NOTNUMBER")
+		context := context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx)
+		req = req.WithContext(context)
+
+		// Act
+		handler.GetProductByID(res, req)
+
+		// Assert
+		expectedCode := http.StatusBadRequest
+		expectedBody := `{"message":"Invalid ID", "status": 400}`
+		expectedHeader := http.Header{
+			"Content-Type": []string{"application/json"},
+		}
+		require.Equal(t, expectedCode, res.Code)
+		require.JSONEq(t, expectedBody, res.Body.String())
+		require.Equal(t, expectedHeader, res.Header())
+
+	})
+
+	t.Run("Se solicita un id que no existe en los productos listados.", func(t *testing.T) {
+		// Arrange
+		data := map[int]internal.Product{
+			1: {
+				ID:          1,
+				Name:        "Producto 1",
+				Quantity:    10,
+				CodeValue:   "123456",
+				IsPublished: true,
+				Expiration:  time.Date(2021, 12, 31, 0, 0, 0, 0, time.UTC),
+				Price:       100,
+			},
+			2: {
+				ID:          2,
+				Name:        "Producto 2",
+				Quantity:    20,
+				CodeValue:   "654321",
+				IsPublished: false,
+				Expiration:  time.Date(2021, 12, 31, 0, 0, 0, 0, time.UTC),
+				Price:       200,
+			},
+		}
+		repo := repository.NewRepositoryMap(data)
+		service := service.NewProductService(repo)
+		handler := handler.NewProductHandler(service)
+
+		res := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/products/3", nil)
+		// add id path param to the request
+		chiCtx := chi.NewRouteContext()
+		chiCtx.URLParams.Add("id", "3")
+		context := context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx)
+		req = req.WithContext(context)
+
+		// Act
+		handler.GetProductByID(res, req)
+
+		// Assert
+		expectedCode := http.StatusNotFound
+		expectedBody := `{"message":"No products found", "status": 404}`
+		expectedHeader := http.Header{
+			"Content-Type": []string{"application/json"},
+		}
+		require.Equal(t, expectedCode, res.Code)
+		require.JSONEq(t, expectedBody, res.Body.String())
+		require.Equal(t, expectedHeader, res.Header())
+	})
 }
 
 func TestCreateProduct(t *testing.T) {
@@ -182,6 +260,46 @@ func TestDeleteProduct(t *testing.T) {
 		expectedHeader := http.Header{}
 		require.Equal(t, expectedCode, res.Code)
 		require.Equal(t, expectedBody, res.Body.String())
+		require.Equal(t, expectedHeader, res.Header())
+	})
+
+	t.Run("Se intenta eliminar un producto pero no esta autorizado", func(t *testing.T) {
+		// Arrange
+		data := map[int]internal.Product{
+			1: {
+				ID:          1,
+				Name:        "Producto 1",
+				Quantity:    10,
+				CodeValue:   "123456",
+				IsPublished: true,
+				Expiration:  time.Date(2021, 12, 31, 0, 0, 0, 0, time.UTC),
+				Price:       100,
+			},
+		}
+		repo := repository.NewRepositoryMap(data)
+		service := service.NewProductService(repo)
+		handler := handler.NewProductHandler(service)
+
+		res := httptest.NewRecorder()
+		req := httptest.NewRequest("DELETE", "/products/1", nil)
+
+		// add id path param to the request
+		chiCtx := chi.NewRouteContext()
+		chiCtx.URLParams.Add("id", "1")
+		context := context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx)
+		req = req.WithContext(context)
+
+		// Act
+		handler.DeleteProduct(res, req)
+
+		// Assert
+		expectedCode := http.StatusUnauthorized
+		expectedBody := `{"message":"Unauthorized", "status": 401}`
+		expectedHeader := http.Header{
+			"Content-Type": []string{"application/json"},
+		}
+		require.Equal(t, expectedCode, res.Code)
+		require.JSONEq(t, expectedBody, res.Body.String())
 		require.Equal(t, expectedHeader, res.Header())
 	})
 }
