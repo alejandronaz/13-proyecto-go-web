@@ -19,7 +19,7 @@ func NewRepositoryFile() *RepositoryFile {
 func (r *RepositoryFile) getDataFromFile() ([]internal.Product, error) {
 
 	// read the json file as a slice of bytes
-	data, err := os.ReadFile("app/data/storage/products.json")
+	data, err := os.ReadFile("app/data/file_storage/products.json")
 	if err != nil {
 		fmt.Println(err)
 		return []internal.Product{}, err
@@ -51,7 +51,7 @@ func (r *RepositoryFile) getDataFromFile() ([]internal.Product, error) {
 func (r *RepositoryFile) saveDataToFile(products []internal.Product) error {
 
 	// open the file
-	file, err := os.OpenFile("app/data/storage/products.json", os.O_WRONLY, 0644)
+	file, err := os.OpenFile("app/data/file_storage/products.json", os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Println(err)
 		return err
