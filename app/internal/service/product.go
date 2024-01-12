@@ -1,10 +1,7 @@
 package service
 
 import (
-	"fmt"
 	"goweb/app/internal"
-	"strings"
-	"time"
 )
 
 // implements internal.ProductService and uses internal.ProductRepository (other interface)
@@ -55,17 +52,6 @@ func (p *ProductService) CreateProduct(product internal.Product) (internal.Produ
 		}
 	}
 
-	// verify expiration format XX/XX/XXXX
-	exp := strings.Split(product.Expiration, "/")
-	if len(exp) != 3 {
-		return internal.Product{}, internal.ErrInvalidExpirationFormat
-	}
-	// if time cant parse it, then it is invalid
-	_, err := time.Parse(time.DateOnly, fmt.Sprint(exp[2], "-", exp[1], "-", exp[0]))
-	if err != nil {
-		return internal.Product{}, internal.ErrInvalidExpirationFormat
-	}
-
 	// add the product to the repo
 	product = p.repo.AddProduct(product)
 
@@ -78,17 +64,6 @@ func (p *ProductService) UpdateProduct(product internal.Product) (internal.Produ
 	// check if product is empty
 	if product.IsEmpty() {
 		return internal.Product{}, internal.ErrProductEmpty
-	}
-
-	// verify expiration format XX/XX/XXXX
-	exp := strings.Split(product.Expiration, "/")
-	if len(exp) != 3 {
-		return internal.Product{}, internal.ErrInvalidExpirationFormat
-	}
-	// if time cant parse it, then it is invalid
-	_, err := time.Parse(time.DateOnly, fmt.Sprint(exp[2], "-", exp[1], "-", exp[0]))
-	if err != nil {
-		return internal.Product{}, internal.ErrInvalidExpirationFormat
 	}
 
 	// check if the code value belongs to another product

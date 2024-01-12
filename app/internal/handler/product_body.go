@@ -2,7 +2,10 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"goweb/app/internal"
+	"strings"
+	"time"
 )
 
 type RequestBodyProduct struct {
@@ -25,15 +28,30 @@ type ResponseBodyProduct struct {
 }
 
 func parseProductToBody(product internal.Product) ResponseBodyProduct {
+
 	return ResponseBodyProduct{
 		ID:          product.ID,
 		Name:        product.Name,
 		Quantity:    product.Quantity,
 		CodeValue:   product.CodeValue,
 		IsPublished: product.IsPublished,
-		Expiration:  product.Expiration,
+		Expiration:  product.Expiration.Format("02/01/2006"),
 		Price:       product.Price,
 	}
+}
+
+func parseExpirationToTime(expiration string) (time.Time, error) {
+	// verify expiration format XX/XX/XXXX
+	exp := strings.Split(expiration, "/")
+	if len(exp) != 3 {
+		return time.Time{}, internal.ErrInvalidExpirationFormat
+	}
+	// if time cant parse it, then it is invalid
+	parsedTime, err := time.Parse(time.DateOnly, fmt.Sprint(exp[2], "-", exp[1], "-", exp[0]))
+	if err != nil {
+		return time.Time{}, internal.ErrInvalidExpirationFormat
+	}
+	return parsedTime, nil
 }
 
 func parseProductsToBody(products []internal.Product) []ResponseBodyProduct {

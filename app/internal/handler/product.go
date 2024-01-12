@@ -177,12 +177,20 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// parse RequestBody to product model
+	parsedTime, err := parseExpirationToTime(product.Expiration)
+	if err != nil {
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid expiration format",
+			Status:  http.StatusBadRequest,
+		})
+		return
+	}
 	newProduct := internal.Product{
 		Name:        product.Name,
 		Quantity:    product.Quantity,
 		CodeValue:   product.CodeValue,
 		IsPublished: product.IsPublished,
-		Expiration:  product.Expiration,
+		Expiration:  parsedTime,
 		Price:       product.Price,
 	}
 
@@ -279,14 +287,23 @@ func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
 	// parse RequestBody to product model
+	parsedTime, err := parseExpirationToTime(product.Expiration)
+	if err != nil {
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid expiration format",
+			Status:  http.StatusBadRequest,
+		})
+		return
+	}
 	productModel := internal.Product{
 		ID:          idProd,
 		Name:        product.Name,
 		Quantity:    product.Quantity,
 		CodeValue:   product.CodeValue,
 		IsPublished: product.IsPublished,
-		Expiration:  product.Expiration,
+		Expiration:  parsedTime,
 		Price:       product.Price,
 	}
 
@@ -348,12 +365,22 @@ func (p *ProductHandler) ParcialUpdateProduct(w http.ResponseWriter, r *http.Req
 		Quantity:    product.Quantity,
 		CodeValue:   product.CodeValue,
 		IsPublished: product.IsPublished,
-		Expiration:  product.Expiration,
+		Expiration:  product.Expiration.Format("02/01/2006"),
 		Price:       product.Price,
 	}
 	if err := json.NewDecoder(r.Body).Decode(&productBody); err != nil {
 		response.JSON(w, http.StatusBadRequest, ErrorResponse{
 			Message: "Invalid product",
+			Status:  http.StatusBadRequest,
+		})
+		return
+	}
+
+	// parse RequestBody to product model
+	parsedTime, err := parseExpirationToTime(productBody.Expiration)
+	if err != nil {
+		response.JSON(w, http.StatusBadRequest, ErrorResponse{
+			Message: "Invalid expiration format",
 			Status:  http.StatusBadRequest,
 		})
 		return
@@ -366,7 +393,7 @@ func (p *ProductHandler) ParcialUpdateProduct(w http.ResponseWriter, r *http.Req
 		Quantity:    productBody.Quantity,
 		CodeValue:   productBody.CodeValue,
 		IsPublished: productBody.IsPublished,
-		Expiration:  productBody.Expiration,
+		Expiration:  parsedTime,
 		Price:       productBody.Price,
 	}
 
