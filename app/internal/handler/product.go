@@ -120,19 +120,6 @@ func (p *ProductHandler) GetProductsByPriceGreaterThan(w http.ResponseWriter, r 
 
 func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 
-	// -----------------------------------------------------
-	// check auth header for creating a product
-	// TODO: implement a middleware for this
-	authHeader := r.Header.Get("Authorization")
-	if authHeader != "1234" {
-		response.JSON(w, http.StatusUnauthorized, ErrorResponse{
-			Message: "Unauthorized",
-			Status:  http.StatusUnauthorized,
-		})
-		return
-	}
-	// -----------------------------------------------------
-
 	// --------check if json sent by client has all the required fields--------
 	// 1. get the body as bytes
 	bytesJson, err := io.ReadAll(r.Body)
@@ -229,19 +216,6 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 // for PUT method
 func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
-	// -----------------------------------------------------
-	// check auth header for updating a product
-	// TODO: implement a middleware for this
-	authHeader := r.Header.Get("Authorization")
-	if authHeader != "1234" {
-		response.JSON(w, http.StatusUnauthorized, ErrorResponse{
-			Message: "Unauthorized",
-			Status:  http.StatusUnauthorized,
-		})
-		return
-	}
-	// -----------------------------------------------------
-
 	// convert the id to int
 	idProd, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -325,19 +299,6 @@ func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 // for PATCH method
 func (p *ProductHandler) ParcialUpdateProduct(w http.ResponseWriter, r *http.Request) {
-
-	// -----------------------------------------------------
-	// check auth header for updating a product
-	// TODO: implement a middleware for this
-	authHeader := r.Header.Get("Authorization")
-	if authHeader != "1234" {
-		response.JSON(w, http.StatusUnauthorized, ErrorResponse{
-			Message: "Unauthorized",
-			Status:  http.StatusUnauthorized,
-		})
-		return
-	}
-	// -----------------------------------------------------
 
 	// convert the id to int
 	idProd, err := strconv.Atoi(chi.URLParam(r, "id"))

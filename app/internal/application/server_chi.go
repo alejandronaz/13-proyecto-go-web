@@ -3,6 +3,7 @@ package application
 import (
 	"errors"
 	"goweb/app/internal/handler"
+	"goweb/app/internal/middleware"
 	"goweb/app/internal/repository"
 	"goweb/app/internal/service"
 	"net/http"
@@ -40,6 +41,9 @@ func (s *ServerChi) Start() error {
 
 	// create a router with chi
 	router := chi.NewRouter()
+
+	// add the middleware
+	router.Use(middleware.Auth, middleware.Logs)
 
 	// create the routes
 	router.Get("/ping", handler.Ping)
