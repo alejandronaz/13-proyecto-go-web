@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"goweb/app/internal"
-	"goweb/app/internal/platform/web/response"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/bootcamp-go/web/response"
 	"github.com/go-chi/chi/v5"
 )
 
