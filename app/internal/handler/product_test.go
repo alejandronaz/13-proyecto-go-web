@@ -144,3 +144,44 @@ func TestCreateProduct(t *testing.T) {
 		require.Equal(t, expectedHeader, res.Header())
 	})
 }
+
+func TestDeleteProduct(t *testing.T) {
+	t.Run("Se elimina el producto con dicho id, y no es necesario retornar nada.", func(t *testing.T) {
+		// Arrange
+		data := map[int]internal.Product{
+			1: {
+				ID:          1,
+				Name:        "Producto 1",
+				Quantity:    10,
+				CodeValue:   "123456",
+				IsPublished: true,
+				Expiration:  time.Date(2021, 12, 31, 0, 0, 0, 0, time.UTC),
+				Price:       100,
+			},
+		}
+		repo := repository.NewRepositoryMap(data)
+		service := service.NewProductService(repo)
+		handler := handler.NewProductHandler(service)
+
+		res := httptest.NewRecorder()
+		req := httptest.NewRequest("DELETE", "/products/1", nil)
+		req.Header.Add("Authorization", "1234")
+
+		// add id path param to the request
+		chiCtx := chi.NewRouteContext()
+		chiCtx.URLParams.Add("id", "1")
+		context := context.WithValue(req.Context(), chi.RouteCtxKey, chiCtx)
+		req = req.WithContext(context)
+
+		// Act
+		handler.DeleteProduct(res, req)
+
+		// Assert
+		expectedCode := http.StatusNoContent
+		expectedBody := ""
+		expectedHeader := http.Header{}
+		require.Equal(t, expectedCode, res.Code)
+		require.Equal(t, expectedBody, res.Body.String())
+		require.Equal(t, expectedHeader, res.Header())
+	})
+}
