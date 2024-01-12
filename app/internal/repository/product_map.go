@@ -13,12 +13,19 @@ type RepositoryMap struct {
 	lastID   int
 }
 
-func NewRepositoryMap() *RepositoryMap {
-	repo := &RepositoryMap{
-		Products: make(map[int]internal.Product),
+func NewRepositoryMap(data map[int]internal.Product) *RepositoryMap {
+
+	if data == nil {
+		repo := &RepositoryMap{
+			Products: make(map[int]internal.Product),
+		}
+		repo.LoadData()
+		return repo
 	}
-	repo.LoadData()
-	return repo
+
+	return &RepositoryMap{
+		Products: data,
+	}
 }
 
 func (r *RepositoryMap) LoadData() {

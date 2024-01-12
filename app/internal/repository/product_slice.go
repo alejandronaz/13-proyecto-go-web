@@ -12,10 +12,17 @@ type Repository struct {
 	Products []internal.Product
 }
 
-func NewRepository() *Repository {
-	repo := &Repository{}
-	repo.LoadData()
-	return repo
+func NewRepository(data []internal.Product) *Repository {
+
+	if data == nil {
+		repo := &Repository{}
+		repo.LoadData()
+		return repo
+	}
+
+	return &Repository{
+		Products: data,
+	}
 }
 
 func (r *Repository) LoadData() {
