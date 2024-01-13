@@ -43,7 +43,7 @@ func (r *Repository) LoadData() {
 	}
 
 	// convert the slice of DTOs to a slice of internal.Product
-	r.Products = dtoToInternal(products)
+	r.Products = dtosToInternals(products)
 
 }
 

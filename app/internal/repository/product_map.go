@@ -55,7 +55,7 @@ func (r *RepositoryMap) LoadData() {
 	}
 
 	// convert the slice of DTOs to a slice of internal.Product
-	productsInternal := dtoToInternal(products)
+	productsInternal := dtosToInternals(products)
 
 	// convert the slice to a map
 	lastId := 0

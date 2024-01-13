@@ -2,9 +2,7 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"goweb/app/internal"
-	"strings"
 	"time"
 )
 
@@ -40,26 +38,29 @@ func parseProductToBody(product internal.Product) ResponseBodyProduct {
 	}
 }
 
-func parseExpirationToTime(expiration string) (time.Time, error) {
-	// verify expiration format XX/XX/XXXX
-	exp := strings.Split(expiration, "/")
-	if len(exp) != 3 {
-		return time.Time{}, internal.ErrInvalidExpirationFormat
-	}
-	// if time cant parse it, then it is invalid
-	parsedTime, err := time.Parse(time.DateOnly, fmt.Sprint(exp[2], "-", exp[1], "-", exp[0]))
-	if err != nil {
-		return time.Time{}, internal.ErrInvalidExpirationFormat
-	}
-	return parsedTime, nil
-}
-
 func parseProductsToBody(products []internal.Product) []ResponseBodyProduct {
 	var productsAsResponse []ResponseBodyProduct
 	for _, product := range products {
 		productsAsResponse = append(productsAsResponse, parseProductToBody(product))
 	}
 	return productsAsResponse
+}
+
+func parseBodyToProduct(id int, body RequestBodyProduct) (internal.Product, error) {
+	// if time cant parse it, then it is invalid
+	parsedTime, err := time.Parse("02/01/2006", body.Expiration)
+	if err != nil {
+		return internal.Product{}, internal.ErrInvalidExpirationFormat
+	}
+	return internal.Product{
+		ID:          id,
+		Name:        body.Name,
+		Quantity:    body.Quantity,
+		CodeValue:   body.CodeValue,
+		IsPublished: body.IsPublished,
+		Expiration:  parsedTime,
+		Price:       body.Price,
+	}, nil
 }
 
 func checkRequiredFields(body map[string]any, requiredFields ...string) error {

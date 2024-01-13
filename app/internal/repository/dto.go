@@ -1,9 +1,7 @@
 package repository
 
 import (
-	"fmt"
 	"goweb/app/internal"
-	"strings"
 	"time"
 )
 
@@ -17,7 +15,7 @@ type ProductDTO struct {
 	Price       float64 `json:"price"`
 }
 
-func internalToDTO(products []internal.Product) []ProductDTO {
+func internalsToDTOs(products []internal.Product) []ProductDTO {
 
 	var productsDTO []ProductDTO
 
@@ -36,7 +34,7 @@ func internalToDTO(products []internal.Product) []ProductDTO {
 	return productsDTO
 }
 
-func dtoToInternal(products []ProductDTO) []internal.Product {
+func dtosToInternals(products []ProductDTO) []internal.Product {
 
 	var productsInternal []internal.Product
 
@@ -58,13 +56,8 @@ func dtoToInternal(products []ProductDTO) []internal.Product {
 }
 
 func parseExpirationToTime(expiration string) (time.Time, error) {
-	// verify expiration format XX/XX/XXXX
-	exp := strings.Split(expiration, "/")
-	if len(exp) != 3 {
-		return time.Time{}, internal.ErrInvalidExpirationFormat
-	}
 	// if time cant parse it, then it is invalid
-	parsedTime, err := time.Parse(time.DateOnly, fmt.Sprint(exp[2], "-", exp[1], "-", exp[0]))
+	parsedTime, err := time.Parse("02/01/2006", expiration)
 	if err != nil {
 		return time.Time{}, internal.ErrInvalidExpirationFormat
 	}

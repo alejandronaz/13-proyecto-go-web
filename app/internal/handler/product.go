@@ -164,21 +164,21 @@ func (p *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// parse RequestBody to product model
-	parsedTime, err := parseExpirationToTime(product.Expiration)
+	newProduct, err := parseBodyToProduct(0, product)
 	if err != nil {
-		response.JSON(w, http.StatusBadRequest, ErrorResponse{
-			Message: "Invalid expiration format",
-			Status:  http.StatusBadRequest,
-		})
+		switch {
+		case errors.Is(err, internal.ErrInvalidExpirationFormat):
+			response.JSON(w, http.StatusBadRequest, ErrorResponse{
+				Message: "Invalid expiration format",
+				Status:  http.StatusBadRequest,
+			})
+		default:
+			response.JSON(w, http.StatusBadRequest, ErrorResponse{
+				Message: "Invalid product",
+				Status:  http.StatusBadRequest,
+			})
+		}
 		return
-	}
-	newProduct := internal.Product{
-		Name:        product.Name,
-		Quantity:    product.Quantity,
-		CodeValue:   product.CodeValue,
-		IsPublished: product.IsPublished,
-		Expiration:  parsedTime,
-		Price:       product.Price,
 	}
 
 	// create the product
@@ -263,22 +263,21 @@ func (p *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// parse RequestBody to product model
-	parsedTime, err := parseExpirationToTime(product.Expiration)
+	productModel, err := parseBodyToProduct(idProd, product)
 	if err != nil {
-		response.JSON(w, http.StatusBadRequest, ErrorResponse{
-			Message: "Invalid expiration format",
-			Status:  http.StatusBadRequest,
-		})
+		switch {
+		case errors.Is(err, internal.ErrInvalidExpirationFormat):
+			response.JSON(w, http.StatusBadRequest, ErrorResponse{
+				Message: "Invalid expiration format",
+				Status:  http.StatusBadRequest,
+			})
+		default:
+			response.JSON(w, http.StatusBadRequest, ErrorResponse{
+				Message: "Invalid product",
+				Status:  http.StatusBadRequest,
+			})
+		}
 		return
-	}
-	productModel := internal.Product{
-		ID:          idProd,
-		Name:        product.Name,
-		Quantity:    product.Quantity,
-		CodeValue:   product.CodeValue,
-		IsPublished: product.IsPublished,
-		Expiration:  parsedTime,
-		Price:       product.Price,
 	}
 
 	// call service
@@ -338,24 +337,21 @@ func (p *ProductHandler) ParcialUpdateProduct(w http.ResponseWriter, r *http.Req
 	}
 
 	// parse RequestBody to product model
-	parsedTime, err := parseExpirationToTime(productBody.Expiration)
+	productModel, err := parseBodyToProduct(idProd, productBody)
 	if err != nil {
-		response.JSON(w, http.StatusBadRequest, ErrorResponse{
-			Message: "Invalid expiration format",
-			Status:  http.StatusBadRequest,
-		})
+		switch {
+		case errors.Is(err, internal.ErrInvalidExpirationFormat):
+			response.JSON(w, http.StatusBadRequest, ErrorResponse{
+				Message: "Invalid expiration format",
+				Status:  http.StatusBadRequest,
+			})
+		default:
+			response.JSON(w, http.StatusBadRequest, ErrorResponse{
+				Message: "Invalid product",
+				Status:  http.StatusBadRequest,
+			})
+		}
 		return
-	}
-
-	// parse RequestBody to product model
-	productModel := internal.Product{
-		ID:          idProd,
-		Name:        productBody.Name,
-		Quantity:    productBody.Quantity,
-		CodeValue:   productBody.CodeValue,
-		IsPublished: productBody.IsPublished,
-		Expiration:  parsedTime,
-		Price:       productBody.Price,
 	}
 
 	// call service

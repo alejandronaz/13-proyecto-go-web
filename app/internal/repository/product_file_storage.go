@@ -42,7 +42,7 @@ func (r *RepositoryFile) getDataFromFile() ([]internal.Product, error) {
 	r.lastID = lastId
 
 	// convert the slice of DTOs to a slice of internal.Product
-	productsInternal := dtoToInternal(products)
+	productsInternal := dtosToInternals(products)
 
 	return productsInternal, nil
 
@@ -59,7 +59,7 @@ func (r *RepositoryFile) saveDataToFile(products []internal.Product) error {
 	defer file.Close()
 
 	// parse internal.Product[] to ProductDTO
-	productsDTO := internalToDTO(products)
+	productsDTO := internalsToDTOs(products)
 
 	// convert the slice to bytes
 	bytes, err := json.Marshal(productsDTO)
