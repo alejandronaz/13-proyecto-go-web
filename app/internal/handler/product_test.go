@@ -67,6 +67,7 @@ func TestGetAllProducts(t *testing.T) {
 }
 
 func TestGetProductByID(t *testing.T) {
+	// test using path param
 	t.Run("Obtener el producto con el id solicitado.", func(t *testing.T) {
 		// Arrange
 		data := map[int]internal.Product{
@@ -295,6 +296,52 @@ func TestDeleteProduct(t *testing.T) {
 		// Assert
 		expectedCode := http.StatusUnauthorized
 		expectedBody := `{"message":"Unauthorized", "status": 401}`
+		expectedHeader := http.Header{
+			"Content-Type": []string{"application/json"},
+		}
+		require.Equal(t, expectedCode, res.Code)
+		require.JSONEq(t, expectedBody, res.Body.String())
+		require.Equal(t, expectedHeader, res.Header())
+	})
+}
+
+// test using query params
+func TestGetProductsByPriceGreaterThan(t *testing.T) {
+	t.Run("Se solicitan los productos cuyo precio sea mayor a 100", func(t *testing.T) {
+		// Arrange
+		data := map[int]internal.Product{
+			1: {
+				ID:          1,
+				Name:        "Producto 1",
+				Quantity:    10,
+				CodeValue:   "123456",
+				IsPublished: true,
+				Expiration:  time.Date(2021, 12, 31, 0, 0, 0, 0, time.UTC),
+				Price:       100,
+			},
+			2: {
+				ID:          2,
+				Name:        "Producto 1",
+				Quantity:    10,
+				CodeValue:   "123456",
+				IsPublished: true,
+				Expiration:  time.Date(2021, 12, 31, 0, 0, 0, 0, time.UTC),
+				Price:       110,
+			},
+		}
+		repo := repository.NewRepositoryMap(data)
+		service := service.NewProductService(repo)
+		handler := handler.NewProductHandler(service)
+
+		res := httptest.NewRecorder()
+		req := httptest.NewRequest("DELETE", "/products?priceGt=100", nil)
+
+		// Act
+		handler.GetProductsByPriceGreaterThan(res, req)
+
+		// Assert
+		expectedCode := http.StatusOK
+		expectedBody := `[{"id":2,"name":"Producto 1","quantity":10,"code_value":"123456","is_published":true,"expiration":"31/12/2021","price":110}]`
 		expectedHeader := http.Header{
 			"Content-Type": []string{"application/json"},
 		}
