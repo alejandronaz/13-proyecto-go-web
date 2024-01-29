@@ -32,8 +32,15 @@ func (s *ServerChi) Start() error {
 	// 2. Service
 	// 3. Handler
 
+	// 0. create the db connection
+	db, err := repository.NewMySQLConnection()
+	if err != nil {
+		return errors.New("an error occurred while connecting to the database")
+	}
+	defer db.Close()
+
 	// 1. create the repo (aqui elijo especificamente que repo usar)
-	repo := repository.NewRepositoryMap(nil)
+	repo := repository.NewProductRepositorySQL(db)
 	// 2. create the service
 	service := service.NewProductService(repo)
 	// 3. create the handler
@@ -61,7 +68,7 @@ func (s *ServerChi) Start() error {
 	})
 
 	// 5. start the server
-	err := http.ListenAndServe(":8080", router)
+	err = http.ListenAndServe(":8080", router)
 	if err != nil {
 		return errors.New("an error occurred while starting the server")
 	}
